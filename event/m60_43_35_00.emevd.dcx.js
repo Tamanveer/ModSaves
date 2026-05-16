@@ -219,5 +219,4 @@ $Event(1043353780, Restart, function(chrEntityId){
     DeleteAssetfollowingSFX(1043350810, true);
     DisableAsset(1043350811);
     DeleteAssetfollowingSFX(1043350811, true);
-    ForceAnimationPlayback(10000, 913000, false, false, false);
 });

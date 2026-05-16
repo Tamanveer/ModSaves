@@ -442,7 +442,8 @@ $Event(0, Default, function() {
     InitializeEvent(0, 9941, 0);
     InitializeEvent(0, 9943, 0);
     InitializeEvent(0, 9940, 0);
-    $InitializeEvent(0, 9960);
+    $InitializeEvent(0, 9960, 8000000, 531100);
+    $InitializeEvent(1, 9960, 8000010, 531120);
     $InitializeEvent(0, 1700);
 });
 
@@ -9149,17 +9150,15 @@ $Event(9950, Default, function(eventFlagId, eventFlagId2) {
     SetEventFlagID(eventFlagId2, ON);
 });
 
-// Check For Lightning Power
-$Event(9960, Restart, function() {
+// Check For Power
+$Event(9960, Restart, function(itemId, spEffect) {
     DisableNetworkSync();
-    if (!CharacterHasSpEffect(10000, 531100)) {
-        WaitFor(PlayerHasItem(ItemType.Goods, 8000000));
-        SetSpEffect(10000, 531100);
+    if (!CharacterHasSpEffect(10000, spEffect)) {
+        WaitFor(PlayerHasItem(ItemType.Goods, itemId));
+        SetSpEffect(10000, spEffect);
     }
 L0:
-    WaitFor(!PlayerHasItem(ItemType.Goods, 8000000));
-    ClearSpEffect(10000,531100);
+    WaitFor(!PlayerHasItem(ItemType.Goods, itemId));
+    ClearSpEffect(10000,spEffect);
     RestartEvent();
 });
-
-

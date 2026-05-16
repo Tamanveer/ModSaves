@@ -4,7 +4,7 @@
 // @game    Sekiro
 // @string    "N:\\GR\\data\\Param\\event\\common_func.emevd\u0000N:\\GR\\data\\Param\\event\\common_macro.emevd\u0000\u0000\u0000\u0000\u0000\u0000"
 // @linked    [0,82]
-// @version    3.5
+// @version    3.6.3
 // ==/EMEVD==
 
 // コンストラクタ -- constructor
@@ -23,11 +23,11 @@ $Event(0, Default, function() {
     $InitializeCommonEvent(0, 90005300, 10009801, 10009801, 0, 0, 0); //No respawn
     $InitializeCommonEvent(0, 90005300, 10009802, 10009802, 0, 0, 0); //No respawn
     $InitializeCommonEvent(0, 90005300, 10009803, 10009803, 0, 0, 0); //No respawn
-    $InitializeCommonEvent(0, 90005300, 10009804, 10009803, 0, 0, 0); //No respawn
+    $InitializeCommonEvent(0, 90005300, 10009804, 10009804, 0, 0, 0); //No respawn
     //Commander Boss stuff
-    $InitializeCommonEvent(0, 90005870, 1042370801, 903251603, 12);
-    $InitializeCommonEvent(0, 90005872, 1042370801, 12, 0);
+    $InitializeCommonEvent(0, 90005870, 1042370801, 903251603, 11);
     $InitializeCommonEvent(0, 90005860, 1042370801, 0, 1042370801, 0, 0, 0);
+    $InitializeCommonEvent(0, 90005872, 1042370801, 11, 0);
     
     $InitializeCommonEvent(0, 9005811, 10000850, 1042949850, 19, 10000851);
     $InitializeCommonEvent(0, 9005811, 10000850, 1042949851, 19, 10000851);
@@ -53,6 +53,8 @@ $Event(0, Default, function() {
     $InitializeEvent(4, 1042373704, 10009804, 10009900, 2, -1); //gatefront balista activate
     $InitializeEvent(0, 1042373706, 1042371700, 1042371702, 60060, 9522);
     $InitializeEvent(0, 1042373707);
+    $InitializeEvent(0, 1042373708, 1042370811);
+    //$InitializeEvent(0, 1042373780);
 });
 
 // プリコンストラクタ -- preconstructor
@@ -219,12 +221,14 @@ $Event(1042373705, Restart, function(eventFlagId){
     EndEvent();
 });
 
+// Boss Gate Enter
 $Event(1042373706, Default, function(entityId, entityId2, animationId, actionButtonParameterId){
     EndIf(!PlayerIsInOwnWorld());
     online = HasMultiplayerState(MultiplayerState.Multiplayer)
         || HasMultiplayerState(MultiplayerState.MultiplayerPending);
     onlineAct &= !online;
     GotoIf(S0, online);
+    WaitForEventFlag(OFF, TargetEventFlagType.EventFlag, 1042370811);
     onlineAct &= PlayerIsInOwnWorld() && ActionButtonInArea(actionButtonParameterId, entityId);
     WaitFor(onlineAct);
     if (!EventFlag(1042370801))  {
@@ -236,14 +240,73 @@ S0:
 L1:
     RotateCharacter(10000, entityId2, -1, true);
     ForceAnimationPlayback(10000, animationId, false, false, false);
+    
+    WaitFixedTimeSeconds(2);
+    
+    EnableCharacter(1042370811);
+    EnableCharacter(1042370812);
+    ForceAnimationPlayback(1042370811, 3022, false, true, false, Equal, 1);
+    ForceAnimationPlayback(1042370812, 3022, false, true, false, Equal, 1);
+    
+    DisplayBossHealthBar(Disabled, 1042370801, 0, 903251603);
+    DisplayBossHealthBar(Enabled, 1042370811, 0, 903251604);
+    DisplayBossHealthBar(Enabled, 1042370812, 1, 903251605);
 });
 
+// Gate Captain Dead
 $Event(1042373707, Restart, function(){
-    $InitializeEvent(0, 1042373705, 10009800); //sets no respawn enemies to spawn again
-    $InitializeEvent(1, 1042373705, 10009801); //sets no respawn enemies to spawn again
-    $InitializeEvent(2, 1042373705, 10009802); //sets no respawn enemies to spawn again
-    $InitializeEvent(3, 1042373705, 10009803); //sets no respawn enemies to spawn again
-    $InitializeEvent(4, 1042373705, 10009804); //sets no respawn enemies to spawn again
-    $InitializeEvent(5, 1042373705, 1042370801); //sets no respawn enemies to spawn again
-    $InitializeEvent(6, 1042373705, 10000850); //sets no respawn enemies to spawn again
+    DisableCharacter(1042370811);
+    DisableCharacter(1042370812);
+    WaitFor(CharacterDeadAlive(1042370811, DeathState.Alive));
+    WaitFor(CharacterDeadAlive(1042370812, DeathState.Alive));
+    
+    WaitFor(CharacterRatioDead(1042370811));
+    WaitFor(CharacterRatioDead(1042370812));
+    SetEventFlag(TargetEventFlagType.EventFlag, 1042370811, ON);
+    HandleBossDefeatAndDisplayBanner(1042370811, TextBannerType.GreatEnemyFelled);
+    AwardItemsIncludingClients(2100000010);
+});
+
+// Boss Walls Down
+$Event(1042373708, Restart, function(chrEntityId){
+    WaitFixedTimeFrames(5);
+    WaitForEventFlag(ON, TargetEventFlagType.EventFlag, chrEntityId);
+    DisableAsset(1042949850);
+    DeleteAssetfollowingSFX(1042949850, true);
+    DisableAsset(1042949851);
+    DeleteAssetfollowingSFX(1042949851, true);
+    DisableAsset(1042949852);
+    DeleteAssetfollowingSFX(1042949852, true);
+    DisableAsset(1042949853);
+    DeleteAssetfollowingSFX(1042949853, true);
+    DisableAsset(1042949854);
+    DeleteAssetfollowingSFX(1042949854, true);
+    DisableAsset(1042949855);
+    DeleteAssetfollowingSFX(1042949855, true);
+    DisableAsset(1042949856);
+    DeleteAssetfollowingSFX(1042949856, true);
+    DisableAsset(1042949857);
+    DeleteAssetfollowingSFX(1042949857, true);
+    DisableAsset(1042949858);
+    DeleteAssetfollowingSFX(1042949858, true);
+    DisableAsset(1042949859);
+    DeleteAssetfollowingSFX(1042949859, true);
+    DisableAsset(1042371701);
+    DeleteAssetfollowingSFX(1042371701, true);
+    DisableAsset(1042371703);
+    DeleteAssetfollowingSFX(1042371703, true);
+    DisableAsset(1042371741);
+    DeleteAssetfollowingSFX(1042371741, true);
+});
+
+// Comment this out!!!!!
+$Event(1042373780, Restart, function(){
+    //$InitializeEvent(0, 1042373705, 10009800); //sets no respawn enemies to spawn again
+    //$InitializeEvent(1, 1042373705, 10009801); //sets no respawn enemies to spawn again
+    //$InitializeEvent(2, 1042373705, 10009802); //sets no respawn enemies to spawn again
+    //$InitializeEvent(3, 1042373705, 10009803); //sets no respawn enemies to spawn again
+    //$InitializeEvent(4, 1042373705, 10009804); //sets no respawn enemies to spawn again
+    //$InitializeEvent(5, 1042373705, 1042370801); //sets no respawn enemies to spawn again
+    //$InitializeEvent(6, 1042373705, 10000850); //sets no respawn enemies to spawn again
+    //$InitializeEvent(7, 1042373705, 1042370811); //Resets Boss Flag
 });

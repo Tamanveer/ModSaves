@@ -8,7 +8,7 @@
 -- GlobalVariables
 ------------------------------------------
 CurrentCheckCooldown = 0.0
-MaxCheckCooldown = 1.0
+MaxCheckCooldown = 0.5
 ProphetCurrentFPCount = 0.0
 ProphetFPStored = 0.0
 PrisonerCurrentFPCount = 0.0
@@ -4668,8 +4668,10 @@ end
 function SpecialAttackCheck()
 	if env(GetSpEffectID, 531100) == TRUE and CurrentFP >= 8 then
 		ExecEventAllBody("SpecialSuperAttack")
-	else
+	elseif env(GetSpEffectID, 531120) == TRUE and CurrentFP >= 15 then
 		ExecEventAllBody("LionSummonAttack")
+	else
+		ExecEventAllBody("W_DefaultBackStep")
 	end
 end
 
